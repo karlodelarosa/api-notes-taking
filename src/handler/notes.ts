@@ -46,4 +46,38 @@ router.post('/add', (req: Request, res: Response) => {
     })
 })
 
+router.put('/:id', (req: Request, res: Response) => {
+    const { title, content, id } = req.body
+    const query = `UPDATE ${table} SET title = ?, content = ? WHERE id = ?`;
+    db.query({
+        sql: query,
+        values: [title, content, id ]
+    }, (err: MysqlError, result: any) => {
+        if (err) {
+            throw err;
+        }
+        res.send({
+            success: true,
+            message: 'Note successfully updated!'
+        });
+    })
+})
+
+router.delete('/:id', (req: Request, res: Response) => {
+    const { id } = req.body
+    const query = `DELETE from ${table} WHERE id = ?`;
+    db.query({
+        sql: query,
+        values: [id]
+    }, (err: MysqlError, result: any) => {
+        if (err) {
+            throw err;
+        }
+        res.send({
+            success: true,
+            message: 'Note successfully deleted!'
+        });
+    })
+})
+
 export default router;

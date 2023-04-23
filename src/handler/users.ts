@@ -1,7 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { Connection, MysqlError } from 'mysql';
+import { Request, Response, NextFunction } from "express";
+import { MysqlError } from 'mysql';
 import { Router } from 'express';
+import * as dotenv from "dotenv";
+
 import db from "../db/connection";
+import { verifyToken } from "../composable/verifiyToken";
+
+dotenv.config();
 
 const router = Router();
 const table = 'user'
@@ -31,28 +36,48 @@ router.get('/:id', (req: Request, res: Response) => {
     })
 })
 
-router.post('/auth', (req: Request, res: Response) => {
+const ensureToken = (req: Request, res: Response, next: NextFunction) => {
+    const bearerHeader = req.headers['authorization']
+    if (typeof bearerHeader !== 'undefined') {
+        const bearer = bearerHeader?.split(" ")
+        const bearerToken = bearer[1]
+        req.token = bearerToken
+        next();
+    } else {
+        res.sendStatus(403)
+    }
+}
+
+router.post('/auth', ensureToken, (req: Request, res: Response, next: NextFunction) => {
     const { name, password } = req.body;
-    const query = `SELECT * FROM ${table} WHERE name = ? AND password = ?`
-    db.query({
-        sql: query,
-        values: [name, password]
-    }, (err: MysqlError, result: any) => {
-        if (err) {
-            throw err;
-        }
-        if (result.length > 0) {
-            res.send({
-                success: true,
-                message: 'User Authenticated'
-            });
-        } else {
-            res.send({
-                success: false,
-                message: 'Incorrect Username and/or Password!'
-            });
-        }
-    })
+    const isAllowed = verifyToken(req.token)
+
+    if (isAllowed) {
+        const query = `SELECT * FROM ${table} WHERE name = ? AND password = ?`
+        db.query({
+            sql: query,
+            values: [name, password]
+        }, (err: MysqlError, result: any) => {
+            console.info(process.env.TOKEN_SECRET)
+            if (err) {
+                throw err;
+            }
+            if (result.length > 0) {
+                res.send({
+                    success: true,
+                    message: 'User Authenticated'
+                });
+            } else {
+                res.send({
+                    success: false,
+                    message: 'Incorrect Username and/or Password!'
+                });
+            }
+        })
+    } else {
+        res.sendStatus(403)
+    }
+    
 })
 
 export default router;
