@@ -29,4 +29,21 @@ router.get('/:id', (req: Request, res: Response) => {
     })
 })
 
+router.post('/add', (req: Request, res: Response) => {
+    const { title, content } = req.body
+    const query = `INSERT INTO ${table} (title, content) VALUES (?, ?)`
+    db.query({
+        sql: query,
+        values: [title, content]
+    }, (err: MysqlError, result: any) => {
+        if (err) {
+            throw err;
+        }
+        res.send({
+            success: true,
+            message: 'Note successfully added!'
+        });
+    })
+})
+
 export default router;
