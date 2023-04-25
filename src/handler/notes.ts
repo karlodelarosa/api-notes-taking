@@ -94,6 +94,7 @@ router.post('/add', ensureToken, (req: Request, res: Response) => {
         parsed.labelIds.forEach((id: number) => {
           sqlString += `(${lastInsertedId}, ${id}),`
         })
+        // Todo: Find a way to secure this query
         const query2 = `INSERT INTO note_label (noteId, labelId) VALUES ${sqlString.slice(0, -1)}`
         db.query(query2, (err: MysqlError, result: any) => {
           if (err) {
