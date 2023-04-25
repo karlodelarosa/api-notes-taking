@@ -67,7 +67,6 @@ router.get('/label/:id', (req: Request, res: Response) => {
 })
 
 router.post('/add', ensureToken, (req: Request, res: Response) => {
-  // const { title, content } = req.body
   const { data } = req.body
   const isAllowed = verifyToken(req.token)
   const parsed = JSON.parse(data)
@@ -106,12 +105,6 @@ router.post('/add', ensureToken, (req: Request, res: Response) => {
           });
         })
       }
-
-
-      // res.send({
-      //     success: true,
-      //     message: 'Note successfully added!'
-      // });
     })
   } else {
     res.sendStatus(403)
@@ -119,22 +112,63 @@ router.post('/add', ensureToken, (req: Request, res: Response) => {
 })
 
 router.put('/:id', ensureToken, (req: Request, res: Response) => {
-  const { title, content, id } = req.body
+  const { data } = req.body
   const isAllowed = verifyToken(req.token)
+  const parsed = JSON.parse(data)
 
   if (isAllowed) {
     const query = `UPDATE ${table} SET title = ?, content = ? WHERE id = ?`;
     db.query({
       sql: query,
-      values: [title, content, id]
-    }, (err: MysqlError, result: any) => {
+      values: [parsed.title, parsed.content, parsed.id]
+    }, (err: MysqlError, results: any) => {
       if (err) {
         throw err;
       }
-      res.send({
-        success: true,
-        message: 'Note successfully updated!'
-      });
+      // const lastInsertedId = results.insertId
+      const isEmptyLabel = parsed.labelIds.length <= 0
+      let sqlString = ''
+
+      if (isEmptyLabel) {
+        const deleteNoteLabelSql = `DELETE FROM note_label WHERE noteId = ?`
+        db.query({
+          sql: deleteNoteLabelSql,
+          values: [parsed.id]
+        }, (err: MysqlError, results: any) => {
+          if (err) {
+            throw err;
+          }
+          res.send({
+            success: true,
+            message: 'Note successfully updated!'
+          });
+        })
+      } else {
+        const deleteNoteLabelSql = `DELETE FROM note_label WHERE noteId = ?`
+        db.query({
+          sql: deleteNoteLabelSql,
+          values: [parsed.id]
+        }, (err: MysqlError, results: any) => {
+          if (err) {
+            throw err;
+          }
+        })
+
+        parsed.labelIds.forEach((id: number) => {
+          sqlString += `(${parsed.id}, ${id}),`
+        })
+        // Todo: Find a way to secure this query
+        const query2 = `INSERT INTO note_label (noteId, labelId) VALUES ${sqlString.slice(0, -1)}`
+        db.query(query2, (err: MysqlError, result: any) => {
+          if (err) {
+            throw err;
+          }
+          res.send({
+            success: true,
+            message: 'Note and Label successfully added!'
+          });
+        })
+      }
     })
   } else {
     res.sendStatus(403)
