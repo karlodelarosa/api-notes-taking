@@ -12,7 +12,9 @@ const app = express();
 const port = 7000
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: ['https://app-notes-taking.pages.dev/']
+}));
 app.use(express.json());
 
 app.use('/note', notes)
