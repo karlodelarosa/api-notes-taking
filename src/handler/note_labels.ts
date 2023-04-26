@@ -31,7 +31,6 @@ router.get('/', (req: Request, res: Response) => {
 
 router.get('/join', (req: Request, res: Response) => {
     const sql = `SELECT note.id, note.title, note.content, label.name FROM note_label INNER JOIN note ON note.id = note_label.noteId INNER JOIN label ON label.id = note_label.labelId;`;
-    console.info(sql)  
     db.query(sql, (err: MysqlError, result: any) => {
         if (err) {
             throw err;
@@ -42,7 +41,6 @@ router.get('/join', (req: Request, res: Response) => {
 
 router.get('/join/:id', (req: Request, res: Response) => {
     const sql = `SELECT note.id, note.title, note.content, label.name FROM note_label INNER JOIN note ON note.id = note_label.noteId INNER JOIN label ON label.id = note_label.labelId;`;
-    console.info(sql)  
     db.query(sql, (err: MysqlError, result: any) => {
         if (err) {
             throw err;

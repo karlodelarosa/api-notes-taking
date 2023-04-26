@@ -1,10 +1,10 @@
 import mysql, { Connection, MysqlError } from 'mysql';
 
 const db: Connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'notes-db'
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DB
 });
 
 db.connect((err: MysqlError) => {

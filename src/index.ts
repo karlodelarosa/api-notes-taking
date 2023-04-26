@@ -1,5 +1,6 @@
 import express from "express";
-import * as dotenv from "dotenv";
+import dotenv from 'dotenv';
+dotenv.config();
 import cors from "cors";
 import helmet from "helmet";
 import notes from './handler/notes'

@@ -51,9 +51,6 @@ router.get('/:id', (req: Request, res: Response) => {
 router.post('/auth', ensureToken, (req: Request, res: Response, next: NextFunction) => {
     const { name, password } = req.body;
     const isAllowed = verifyToken(req.token)
-
-    console.info(password)
-
     if (isAllowed) {
         const query = `SELECT name FROM ${table} WHERE name = ? AND password = ?`
         db.query({
