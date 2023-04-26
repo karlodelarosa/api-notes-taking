@@ -125,7 +125,6 @@ router.put('/:id', ensureToken, (req: Request, res: Response) => {
       if (err) {
         throw err;
       }
-      // const lastInsertedId = results.insertId
       const isEmptyLabel = parsed.labelIds.length <= 0
       let sqlString = ''
 
@@ -165,7 +164,7 @@ router.put('/:id', ensureToken, (req: Request, res: Response) => {
           }
           res.send({
             success: true,
-            message: 'Note and Label successfully added!'
+            message: 'Note and Label successfully updated!'
           });
         })
       }
